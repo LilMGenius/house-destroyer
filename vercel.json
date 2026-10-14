@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "headers": [{ "source": "/(.*)", "headers": [{ "key": "Permissions-Policy", "value": "xr-spatial-tracking=(self), camera=(self)" }] }]
+}
