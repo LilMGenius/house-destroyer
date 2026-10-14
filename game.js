@@ -155,7 +155,7 @@ function decal(key, point, normal, size, color, rot = rnd() * 6.28, sx = 1, blen
 const parts = []; // {mesh, vel, life, grav, spin, kind}
 const chunkGeo = new THREE.BoxGeometry(1, 1, 1);
 const chunkMats = {};
-const MAX_PARTS = 300;
+const MAX_PARTS = 80;
 const spriteMats = {};
 function sprite(key, color, add) { const k = key + color + add; if (!spriteMats[k]) spriteMats[k] = new THREE.SpriteMaterial({ map: TEX[key], color, transparent: true, depthWrite: false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending }); return new THREE.Sprite(spriteMats[k]); }
 function particle(mesh, vel, life, grav = 9.8, extra = {}) { if (parts.length >= MAX_PARTS) { const p = parts.shift(); scene.remove(p.mesh); } scene.add(mesh); parts.push({ mesh, vel, life, max: life, grav, ...extra }); }
@@ -443,8 +443,8 @@ const clock = new THREE.Clock();
 const tmpV = new THREE.Vector3();
 const frameTimes = [];
 renderer.setAnimationLoop((t, frame) => {
+  const workStart = performance.now();
   const dt = Math.min(0.05, clock.getDelta());
-  frameTimes.push(dt * 1000); if (frameTimes.length > 600) frameTimes.shift();
   if (frame && xrSession) updateXR(frame);
   if (screen === 'title') { idleT += dt; if (idleT > 8) { attract = true; attractTick(dt); } }
   if (screen === 'play') {
@@ -469,6 +469,7 @@ renderer.setAnimationLoop((t, frame) => {
   if (fridge) { fridge.open += ((fridge.opened ? 1 : 0) - fridge.open) * dt * 4; fridge.doorPivot.rotation.y = -fridge.open * 1.9; }
   updateFires(dt); updateBugs(dt); updateFoods(dt); updateFurniture(dt);
   renderer.render(scene, camera);
+  frameTimes.push(performance.now() - workStart); if (frameTimes.length > 600) frameTimes.shift();
 });
 buildRoom();
 
