@@ -381,7 +381,8 @@ function syncWorld(frame) {
 }
 async function identify(o) {
   o.userData.unknownPending = true;
-  try { const img = renderer.domElement.toDataURL('image/jpeg', 0.5); const r = await fetch('/api/identify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: img }) }); if (!r.ok) return; const j = await r.json(); if (j?.name) { o.userData.label = String(j.name).slice(0, 24); o.userData.material = j.material; o.userData.breakStyle = j.breakStyle; hype('THAT\'S A ' + o.userData.label.toUpperCase() + '!'); } } catch { /* offline: stays unknown */ }
+  const fallback = { name: 'mystery object', material: 'mixed material', breakStyle: 'shatter' };
+  try { const img = renderer.domElement.toDataURL('image/jpeg', 0.5); const r = await fetch('/api/identify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: img }) }); const j = r.ok ? await r.json() : fallback; const result = j?.name ? j : fallback; o.userData.label = String(result.name).slice(0, 24); o.userData.material = result.material; o.userData.breakStyle = result.breakStyle; hype('THAT\'S A ' + o.userData.label.toUpperCase() + '!'); } catch { o.userData.label = fallback.name; o.userData.material = fallback.material; o.userData.breakStyle = fallback.breakStyle; }
 }
 const hands = { left: null, right: null };
 function joint(frame, hand, name) { const j = hand?.get(name); if (!j) return null; const p = frame.getJointPose?.(j, xrRefSpace); return p ? p.transform : null; }
