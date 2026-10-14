@@ -32,7 +32,7 @@ const TEX = {
   scorch: canvasTex(128, 128, (g) => { const gr = g.createRadialGradient(64, 64, 4, 64, 64, 62); gr.addColorStop(0, '#000e'); gr.addColorStop(0.6, '#1a0a00b0'); gr.addColorStop(1, '#0000'); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); }),
   hole: canvasTex(64, 64, (g) => { g.fillStyle = '#000'; g.beginPath(); g.arc(32, 32, 12, 0, 7); g.fill(); g.strokeStyle = '#555'; g.lineWidth = 2; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(32, 32); g.lineTo(32 + Math.cos(i) * 28, 32 + Math.sin(i * 1.3) * 28); g.stroke(); } }),
   splat: canvasTex(128, 128, (g) => { g.fillStyle = '#fff'; jagged(g, 64, 64, 44, 14); g.fill(); for (let i = 0; i < 10; i++) { g.beginPath(); g.arc(64 + Math.cos(i * 2.1) * 52, 64 + Math.sin(i * 2.1) * 52, 4 + (i % 4) * 2, 0, 7); g.fill(); } }),
-  stamp: canvasTex(256, 128, (g) => { g.strokeStyle = '#d0102a'; g.fillStyle = '#d0102a'; g.lineWidth = 10; g.strokeRect(10, 10, 236, 108); g.font = 'bold 64px Impact, sans-serif'; g.textAlign = 'center'; g.fillText('WRECKED', 128, 88); }),
+  stamp: canvasTex(256, 128, (g) => { g.strokeStyle = '#d0102a'; g.fillStyle = '#d0102a'; g.lineWidth = 10; g.strokeRect(10, 10, 236, 108); g.font = 'bold 64px Impact, sans-serif'; g.textAlign = 'center'; g.fillText('DESTROYED', 128, 88); }),
   bite: canvasTex(64, 64, (g) => { g.fillStyle = '#2b1a0c'; for (let i = 0; i < 7; i++) { g.beginPath(); g.arc(32 + Math.cos(i) * 14, 32 + Math.sin(i * 1.7) * 14, 9, 0, 7); g.fill(); } }),
   fire: canvasTex(64, 64, (g) => { const gr = g.createRadialGradient(32, 40, 2, 32, 36, 30); gr.addColorStop(0, '#fff7c0'); gr.addColorStop(0.4, '#ff9a10'); gr.addColorStop(1, '#ff200000'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }),
   puff: canvasTex(64, 64, (g) => { const gr = g.createRadialGradient(32, 32, 2, 32, 32, 30); gr.addColorStop(0, '#ffffffee'); gr.addColorStop(1, '#ffffff00'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }),
@@ -212,7 +212,7 @@ TOOLS.forEach((t, i) => { const b = document.createElement('button'); b.textCont
 function setTool(i) { tool = TOOLS[i]; TOOLS.forEach((t) => t.btn.classList.toggle('on', t === tool)); if (tool.id === 'bugs') { critterIdx = (critterIdx + 1) % 4; tool.btn.textContent = '8 ' + CRITTERS[critterIdx].toUpperCase(); } tone(500, 900, 0.06, 0.08); }
 setTool(0);
 const $ = (id) => document.getElementById(id);
-const HYPE = ['MASSIVE!', 'CHAT IS GOING INSANE', 'INSURANCE FRAUD!', 'NO WAY!!', 'CLIP THAT!', 'DEMOLITION GOD', 'MOM IS GONNA KILL ME', 'ABSOLUTE CARNAGE', 'SUBSCRIBE FOR MORE WRECKS'];
+const HYPE = ['MASSIVE!', 'CHAT IS GOING INSANE', 'INSURANCE FRAUD!', 'NO WAY!!', 'CLIP THAT!', 'DEMOLITION GOD', 'MOM IS GONNA KILL ME', 'ABSOLUTE CARNAGE', 'SUBSCRIBE FOR MORE DESTROYS'];
 function addMoney(v, label, point) {
   if (screen !== 'play' && !attract) return;
   const now = clock.elapsedTime; if (now - lastHit < 1.2) comboT++; else comboT = 0; lastHit = now;
@@ -456,10 +456,10 @@ function resetGame() { chatReq = null; chatT = 6; timeLeft = 90; money = 0; comb
   if (!xrSession) { room.clear(); surfaces.length = 0; furniture.length = 0; buildRoom(); lampLight.intensity = 6; } seed = 1337; yaw = 0; pitch = -0.05; }
 const JOKES = [['Emotional support for houseplant', 480], ['Wasp relocation consultant', 1299], ['"It was like that when I got here" fee', 750], ['Livestream licensing (chat clipped it)', 2400], ['Apocalypse visible through wall surcharge', 6666], ['Landlord therapy, 12 sessions', 3600]];
 function gameOver() { screen = 'over'; overT = 0; $('hud').classList.add('hide'); held = null;
-  const rows = Object.entries(ledger).sort((a, b) => b[1] - a[1]).slice(0, 10); let total = money; let html = '<h2>WRECKSURE MUTUAL<br>INSURANCE CLAIM #' + (100000 + Math.floor(money % 899999)) + '</h2><div style="text-align:center">Policyholder: YOU (allegedly)</div><br>';
+  const rows = Object.entries(ledger).sort((a, b) => b[1] - a[1]).slice(0, 10); let total = money; let html = '<h2>DESTROYSURE MUTUAL<br>INSURANCE CLAIM #' + (100000 + Math.floor(money % 899999)) + '</h2><div style="text-align:center">Policyholder: YOU (allegedly)</div><br>';
   for (const [k, v] of rows) html += `<div class="row"><span>${k}</span><span>$${v.toLocaleString()}</span></div>`;
   for (const [k, v] of JOKES.slice(0, 3 + Math.floor(money / 50000) % 4)) { html += `<div class="row"><span>${k}</span><span>$${v.toLocaleString()}</span></div>`; total += v; }
-  html += `<div class="row tot"><span>TOTAL CLAIM</span><span>$${total.toLocaleString()}</span></div><div class="row"><span>Max combo</span><span>x${combo}</span></div><div class="row"><span>Covered by policy</span><span>$0.00</span></div><p style="text-align:center">Cause of loss: "a guy on stream told me to"</p><div class="stamp">CLAIM DENIED</div><p style="text-align:center">TAP / ENTER TO WRECK AGAIN</p>`;
+  html += `<div class="row tot"><span>TOTAL CLAIM</span><span>$${total.toLocaleString()}</span></div><div class="row"><span>Max combo</span><span>x${combo}</span></div><div class="row"><span>Covered by policy</span><span>$0.00</span></div><p style="text-align:center">Cause of loss: "a guy on stream told me to"</p><div class="stamp">CLAIM DENIED</div><p style="text-align:center">TAP / ENTER TO DESTROY AGAIN</p>`;
   $('receipt').innerHTML = html; $('over').classList.remove('hide'); SFX.stamp(); }
 addEventListener('pointerdown', () => { if (screen === 'over' && overT > 0.6) start(); });
 
