@@ -41,6 +41,29 @@ const TEX = {
 // ---------- audio ----------
 let actx = null;
 function audio() { if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch { actx = null; } } return actx; }
+// Dumb circus-kazoo loop, synthesized in WebAudio so the clip has no asset to load: square lead with a wobbly vibrato over an oom-pah bass.
+const BGM_LEAD = [67,0,67,69,67,0,64,0,67,0,67,69,71,0,67,0, 72,0,71,69,67,0,64,62,60,0,62,64,62,0,55,0];
+const BGM_BASS = [43,50,43,50,41,48,41,48,43,50,43,50,38,45,38,45];
+let bgmTimer = null, bgmStep = 0, bgmGain = null;
+const midiHz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+function bgmNote(a, hz, t, dur, type, vol, wobble) {
+  const o = a.createOscillator(); const g = a.createGain(); o.type = type; o.frequency.setValueAtTime(hz, t);
+  if (wobble) { const l = a.createOscillator(); const lg = a.createGain(); l.frequency.value = 7; lg.gain.value = hz * 0.035; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + dur); }
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(bgmGain); o.start(t); o.stop(t + dur + 0.02);
+}
+function startBgm() {
+  const a = audio(); if (!a || bgmTimer) return;
+  bgmGain = a.createGain(); bgmGain.gain.value = 0.16; bgmGain.connect(a.destination);
+  const stepDur = 0.16; let next = a.currentTime + 0.05;
+  bgmTimer = setInterval(() => {
+    while (next < a.currentTime + 0.3) {
+      const lead = BGM_LEAD[bgmStep % BGM_LEAD.length]; if (lead) bgmNote(a, midiHz(lead), next, stepDur * 0.9, 'square', 0.22, true);
+      if (bgmStep % 2 === 0) bgmNote(a, midiHz(BGM_BASS[(bgmStep / 2) % BGM_BASS.length]), next, stepDur * 1.6, 'triangle', 0.35, false);
+      bgmStep++; next += stepDur;
+    }
+  }, 60);
+}
 function noise(dur, freq, vol = 0.4, type = 'lowpass') {
   const a = audio(); if (!a) return; const n = a.createBufferSource(); const b = a.createBuffer(1, a.sampleRate * dur, a.sampleRate); const d = b.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) ** 2;
@@ -345,7 +368,7 @@ function fire() {
   if (h) damage(h, tool.id);
   if (tool.id === 'flame') { const s = sprite('fire', 0xffffff, true); s.scale.setScalar(0.15); s.position.copy(camera.position).addScaledVector(ray.ray.direction, 0.5).add(new THREE.Vector3(0, -0.2, 0)); particle(s, ray.ray.direction.clone().multiplyScalar(6), 0.35, 0, { grow: 0.6 }); }
 }
-function start() { if (screen === 'play') return; resetGame(); screen = 'play'; attract = false; $('title').classList.add('hide'); $('over').classList.add('hide'); $('hud').classList.remove('hide'); audio(); actx?.resume?.(); hype('LET\'S GOOO!'); }
+function start() { if (screen === 'play') return; resetGame(); screen = 'play'; attract = false; $('title').classList.add('hide'); $('over').classList.add('hide'); $('hud').classList.remove('hide'); audio(); startBgm(); actx?.resume?.(); hype('LET\'S GOOO!'); }
 addEventListener('keydown', (e) => { keys[e.code] = true; idleT = 0;
   if (screen !== 'play') { if (e.code === 'Enter' || e.code === 'Space') { if (screen === 'over' && overT < 0.6) return; start(); } return; }
   if (/^Digit[1-9]$/.test(e.code)) setTool(+e.code.slice(5) - 1);
