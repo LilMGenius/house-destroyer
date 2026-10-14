@@ -44,6 +44,8 @@ function audio() { if (!actx) { try { actx = new (window.AudioContext || window.
 // Dumb circus-kazoo loop, synthesized in WebAudio so the clip has no asset to load: square lead with a wobbly vibrato over an oom-pah bass.
 const BGM_LEAD = [67,0,67,69,67,0,64,0,67,0,67,69,71,0,67,0, 72,0,71,69,67,0,64,62,60,0,62,64,62,0,55,0];
 const BGM_BASS = [43,50,43,50,41,48,41,48,43,50,43,50,38,45,38,45];
+let masterNode = null;
+function masterOut(a) { if (!masterNode) { const g = a.createGain(); g.gain.value = 3.2; const comp = a.createDynamicsCompressor(); comp.threshold.value = -10; comp.ratio.value = 6; g.connect(comp).connect(a.destination); masterNode = g; } return masterNode; }
 let bgmTimer = null, bgmStep = 0, bgmGain = null;
 const midiHz = (m) => 440 * Math.pow(2, (m - 69) / 12);
 function bgmNote(a, hz, t, dur, type, vol, wobble) {
@@ -54,7 +56,7 @@ function bgmNote(a, hz, t, dur, type, vol, wobble) {
 }
 function startBgm() {
   const a = audio(); if (!a || bgmTimer) return;
-  bgmGain = a.createGain(); bgmGain.gain.value = 0.16; bgmGain.connect(a.destination);
+  bgmGain = a.createGain(); bgmGain.gain.value = 0.3; bgmGain.connect(masterOut(a));
   const stepDur = 0.16; let next = a.currentTime + 0.05;
   bgmTimer = setInterval(() => {
     while (next < a.currentTime + 0.3) {
@@ -67,11 +69,11 @@ function startBgm() {
 function noise(dur, freq, vol = 0.4, type = 'lowpass') {
   const a = audio(); if (!a) return; const n = a.createBufferSource(); const b = a.createBuffer(1, a.sampleRate * dur, a.sampleRate); const d = b.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) ** 2;
-  n.buffer = b; const f = a.createBiquadFilter(); f.type = type; f.frequency.value = freq; const gn = a.createGain(); gn.gain.value = vol; n.connect(f).connect(gn).connect(a.destination); n.start();
+  n.buffer = b; const f = a.createBiquadFilter(); f.type = type; f.frequency.value = freq; const gn = a.createGain(); gn.gain.value = vol; n.connect(f).connect(gn).connect(masterOut(a)); n.start();
 }
 function tone(f0, f1, dur, vol = 0.2, type = 'square') {
   const a = audio(); if (!a) return; const o = a.createOscillator(); o.type = type; const gn = a.createGain(); o.frequency.setValueAtTime(f0, a.currentTime); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), a.currentTime + dur);
-  gn.gain.setValueAtTime(vol, a.currentTime); gn.gain.exponentialRampToValueAtTime(0.001, a.currentTime + dur); o.connect(gn).connect(a.destination); o.start(); o.stop(a.currentTime + dur);
+  gn.gain.setValueAtTime(vol, a.currentTime); gn.gain.exponentialRampToValueAtTime(0.001, a.currentTime + dur); o.connect(gn).connect(masterOut(a)); o.start(); o.stop(a.currentTime + dur);
 }
 const SFX = {
   hammer: () => { noise(0.25, 600, 0.6); tone(120, 40, 0.2, 0.3, 'sine'); },
