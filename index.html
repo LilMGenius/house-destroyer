@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>HOME WRECKER</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#111;font-family:Impact,"Arial Black",system-ui,sans-serif;color:#fff;touch-action:none;user-select:none}
+canvas{display:block;width:100vw;height:100vh}
+#hud{position:fixed;inset:0;pointer-events:none}
+#money{position:absolute;top:8px;left:10px;font-size:clamp(22px,6vw,44px);color:#7dff5a;text-shadow:3px 3px 0 #000}
+#money small{display:block;font-size:clamp(12px,3vw,18px);color:#fff}
+#timer{position:absolute;top:8px;right:10px;font-size:clamp(22px,6vw,44px);color:#ffde3a;text-shadow:3px 3px 0 #000}
+#combo{position:absolute;top:22%;width:100%;text-align:center;font-size:clamp(26px,8vw,72px);color:#ff3df2;text-shadow:4px 4px 0 #000;opacity:0;transition:opacity .2s;transform:rotate(-4deg)}
+#cross{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 2px #000}
+#tools{position:absolute;bottom:6px;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;pointer-events:auto;padding:0 4px}
+#tools button{font:inherit;font-size:clamp(11px,2.8vw,16px);background:#222c;color:#fff;border:2px solid #fff6;border-radius:8px;padding:6px 8px;min-width:58px}
+#tools button.on{background:#ff3d3d;border-color:#fff}
+#pops{position:absolute;inset:0;overflow:hidden}
+.pop{position:absolute;font-size:clamp(16px,4vw,28px);color:#7dff5a;text-shadow:2px 2px 0 #000;animation:up 1s forwards;white-space:nowrap}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#000a;padding:12px;box-sizing:border-box}
+.screen h1{font-size:clamp(44px,14vw,140px);margin:0;color:#ff3d3d;text-shadow:6px 6px 0 #000,-2px -2px 0 #ffde3a;transform:rotate(-3deg)}
+.screen p{font-size:clamp(15px,3.6vw,24px);max-width:680px;margin:8px}
+.btn{font:inherit;font-size:clamp(18px,5vw,30px);background:#ffde3a;color:#000;border:4px solid #000;border-radius:12px;padding:10px 22px;margin:8px;box-shadow:5px 5px 0 #000}
+#receipt{background:#fffdf3;color:#111;font-family:"Courier New",monospace;width:min(92vw,420px);max-height:78vh;overflow:auto;padding:14px;box-shadow:0 0 30px #000;transform:rotate(1.5deg);font-size:clamp(12px,3.3vw,15px);text-align:left;position:relative}
+#receipt h2{text-align:center;margin:4px 0;font-size:clamp(16px,4.5vw,22px)}
+#receipt .row{display:flex;justify-content:space-between;gap:8px}
+#receipt .tot{border-top:2px dashed #111;margin-top:8px;padding-top:6px;font-weight:bold;font-size:1.2em}
+#receipt .stamp{position:absolute;top:40%;left:12%;font-size:clamp(28px,9vw,48px);color:#d00c;border:5px solid #d00c;padding:2px 10px;transform:rotate(-18deg);font-family:Impact,sans-serif}
+.hide{display:none!important}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+<div id="hud" class="hide">
+  <div id="money">$0<small>DAMAGE</small></div>
+  <div id="timer">90</div>
+  <div id="combo"></div>
+  <div id="cross"></div>
+  <div id="pops"></div>
+  <div id="tools"></div>
+</div>
+<div id="title" class="screen">
+  <h1>HOME WRECKER</h1>
+  <p>Your house. Your rules. Your insurance company's problem.</p>
+  <p>90 seconds. Nine tools. Rack up the biggest DAMAGE bill you can.</p>
+  <button class="btn" id="playBtn">TAP / CLICK / PRESS ENTER TO START</button>
+  <button class="btn hide" id="arBtn">WRECK MY REAL ROOM (AR)</button>
+  <p style="font-size:clamp(12px,3vw,16px);opacity:.8">Mouse: click to wreck, drag or arrows to look · Keys 1-9 pick tools · G grab & throw furniture · F opens the fridge</p>
+</div>
+<div id="over" class="screen hide">
+  <div id="receipt"></div>
+  <button class="btn" id="againBtn">WRECK IT AGAIN</button>
+</div>
+<script type="module" src="./game.js"></script>
+</body>
+</html>
