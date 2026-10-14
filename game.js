@@ -6,7 +6,7 @@ const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 const rr = (a, b) => a + (b - a) * rnd();
 
 // ---------- renderer ----------
-const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.xr.enabled = true;
@@ -392,7 +392,7 @@ function pulse(intensity, ms) { const s = renderer.xr.getSession?.(); if (!s) re
 async function enterAR() {
   try { xrSession = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['local-floor'], optionalFeatures: ['hand-tracking', 'plane-detection', 'mesh-detection', 'hit-test', 'anchors'] }); }
   catch (e) { hype('AR NOT AVAILABLE'); return; }
-  room.visible = false; scene.background = null; renderer.xr.setReferenceSpaceType('local-floor'); await renderer.xr.setSession(xrSession); xrRefSpace = renderer.xr.getReferenceSpace();
+  room.visible = false; scene.background = null; renderer.setClearColor(0x000000, 0); renderer.xr.setReferenceSpaceType('local-floor'); await renderer.xr.setSession(xrSession); xrRefSpace = renderer.xr.getReferenceSpace();
   xrSession.requestReferenceSpace('viewer').then((vs) => xrSession.requestHitTestSource?.({ space: vs })).then((s) => { hitSource = s; }).catch(() => {});
   surfaces.length = 0; furniture.length = 0; fridge = null; for (const it of foods) scene.remove(it.m); foods.length = 0;
   xrSession.addEventListener('selectstart', (e) => { xrFire(e.inputSource, e.frame); });
