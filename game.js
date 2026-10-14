@@ -152,11 +152,14 @@ function decal(key, point, normal, size, color, rot = rnd() * 6.28, sx = 1, blen
 }
 const parts = []; // {mesh, vel, life, grav, spin, kind}
 const chunkGeo = new THREE.BoxGeometry(1, 1, 1);
+const chunkMats = {};
+const MAX_PARTS = 300;
 const spriteMats = {};
 function sprite(key, color, add) { const k = key + color + add; if (!spriteMats[k]) spriteMats[k] = new THREE.SpriteMaterial({ map: TEX[key], color, transparent: true, depthWrite: false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending }); return new THREE.Sprite(spriteMats[k]); }
-function particle(mesh, vel, life, grav = 9.8, extra = {}) { scene.add(mesh); parts.push({ mesh, vel, life, max: life, grav, ...extra }); if (parts.length > 900) { const p = parts.shift(); scene.remove(p.mesh); } }
+function particle(mesh, vel, life, grav = 9.8, extra = {}) { if (parts.length >= MAX_PARTS) { const p = parts.shift(); scene.remove(p.mesh); } scene.add(mesh); parts.push({ mesh, vel, life, max: life, grav, ...extra }); }
 function chunks(point, normal, color, n, size = 0.08, speed = 3) {
-  for (let i = 0; i < n; i++) { const m = new THREE.Mesh(chunkGeo, mat(color, { flatShading: true })); const s = size * rr(0.5, 1.4); m.scale.set(s, s * rr(0.5, 1), s); m.position.copy(point);
+  const key = String(color); if (!chunkMats[key]) chunkMats[key] = mat(color, { flatShading: true });
+  for (let i = 0; i < n; i++) { const m = new THREE.Mesh(chunkGeo, chunkMats[key]); const s = size * rr(0.5, 1.4); m.scale.set(s, s * rr(0.5, 1), s); m.position.copy(point);
     const v = normal.clone().multiplyScalar(rr(1, speed)).add(new THREE.Vector3(rr(-2, 2), rr(0, 3), rr(-2, 2))); particle(m, v, rr(2, 4), 9.8, { spin: new THREE.Vector3(rr(-9, 9), rr(-9, 9), 0), bounce: true }); }
 }
 function sparks(point, normal, n, color = 0xffd040) {
@@ -436,8 +439,10 @@ addEventListener('pointerdown', () => { if (screen === 'over' && overT > 0.6) st
 // ---------- main loop ----------
 const clock = new THREE.Clock();
 const tmpV = new THREE.Vector3();
+const frameTimes = [];
 renderer.setAnimationLoop((t, frame) => {
   const dt = Math.min(0.05, clock.getDelta());
+  frameTimes.push(dt * 1000); if (frameTimes.length > 600) frameTimes.shift();
   if (frame && xrSession) updateXR(frame);
   if (screen === 'title') { idleT += dt; if (idleT > 8) { attract = true; attractTick(dt); } }
   if (screen === 'play') {
@@ -466,4 +471,4 @@ renderer.setAnimationLoop((t, frame) => {
 buildRoom();
 
 // ---------- test hooks ----------
-window.__game = { state: () => ({ screen, money, timeLeft, combo, tool: tool.id, decals: decals.length }), forceOver: () => { if (screen !== 'play') start(); gameOver(); } };
+window.__game = { state: () => ({ screen, money, timeLeft, combo, tool: tool.id, decals: decals.length }), metrics: () => ({ frameMs: [...frameTimes], render: { ...renderer.info.render }, memory: { ...renderer.info.memory }, pixelRatio: renderer.getPixelRatio() }), forceOver: () => { if (screen !== 'play') start(); gameOver(); } };
