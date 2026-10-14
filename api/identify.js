@@ -10,7 +10,7 @@ const resultSchema = z.object({
 
 const fallback = { name: 'mystery object', material: 'mixed material', breakStyle: 'shatter' };
 
-export default async function handler(req: { method?: string; body?: { image?: string } }, res: { status: (code: number) => { json: (value: unknown) => void }; json: (value: unknown) => void }) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
   try {
     const image = req.body?.image;
