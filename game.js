@@ -142,7 +142,7 @@ function makeFridge(x, z) {
 }
 
 // ---------- decals / particles ----------
-const decals = []; const MAX_DECALS = 450;
+const decals = []; const MAX_DECALS = 40;
 const decalMats = {};
 function decalMat(key, color = 0xffffff, blend = THREE.NormalBlending) { const k = key + color + blend; if (!decalMats[k]) decalMats[k] = new THREE.MeshBasicMaterial({ map: TEX[key], transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, color, blending: blend }); return decalMats[k]; }
 const planeGeo = new THREE.PlaneGeometry(1, 1);
@@ -155,7 +155,7 @@ function decal(key, point, normal, size, color, rot = rnd() * 6.28, sx = 1, blen
 const parts = []; // {mesh, vel, life, grav, spin, kind}
 const chunkGeo = new THREE.BoxGeometry(1, 1, 1);
 const chunkMats = {};
-const MAX_PARTS = 80;
+const MAX_PARTS = 30;
 const spriteMats = {};
 function sprite(key, color, add) { const k = key + color + add; if (!spriteMats[k]) spriteMats[k] = new THREE.SpriteMaterial({ map: TEX[key], color, transparent: true, depthWrite: false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending }); return new THREE.Sprite(spriteMats[k]); }
 function particle(mesh, vel, life, grav = 9.8, extra = {}) { if (parts.length >= MAX_PARTS) { const p = parts.shift(); scene.remove(p.mesh); } scene.add(mesh); parts.push({ mesh, vel, life, max: life, grav, ...extra }); }
@@ -257,7 +257,7 @@ function shatterWindow(o, p, n) {
 }
 // fire spreads over the surface it lands on
 const fires = [];
-function ignite(o, p, n) { if (fires.length > 90) return; const s = sprite('fire', 0xffffff, true); s.scale.setScalar(rr(0.2, 0.35)); s.position.copy(p).addScaledVector(n, 0.1); scene.add(s); fires.push({ s, o, p: p.clone(), n: n.clone(), life: rr(4, 7), spread: rr(0.5, 1.2), scorched: false }); }
+function ignite(o, p, n) { if (fires.length >= 20) return; const s = sprite('fire', 0xffffff, true); s.scale.setScalar(rr(0.2, 0.35)); s.position.copy(p).addScaledVector(n, 0.1); scene.add(s); fires.push({ s, o, p: p.clone(), n: n.clone(), life: rr(4, 7), spread: rr(0.5, 1.2), scorched: false }); }
 function updateFires(dt) {
   for (let i = fires.length - 1; i >= 0; i--) { const f = fires[i]; f.life -= dt; f.spread -= dt; f.s.scale.setScalar((0.25 + 0.08 * Math.sin(clock.elapsedTime * 20 + i)) * Math.min(1, f.life)); f.s.position.y += Math.sin(clock.elapsedTime * 9 + i) * 0.002;
     if (!f.scorched && f.life < 3) { f.scorched = true; decal('scorch', f.p, f.n, rr(0.4, 0.7)); addMoney(f.o.userData.value * 0.3, f.o.userData.label + ' (fire)', null); }
@@ -270,7 +270,7 @@ const bugs = [];
 const bugGeo = { 'fire ants': new THREE.SphereGeometry(0.02, 5, 4), 'wasp swarm': new THREE.ConeGeometry(0.025, 0.07, 5), 'camel crickets': new THREE.SphereGeometry(0.045, 6, 4), 'horsehair worms': new THREE.CylinderGeometry(0.006, 0.006, 0.3, 4) };
 const bugCol = { 'fire ants': 0xc01010, 'wasp swarm': 0xffcc00, 'camel crickets': 0x8a6a3a, 'horsehair worms': 0x2a2018 };
 function release(p, n, o) {
-  const kind = CRITTERS[critterIdx]; const cnt = kind === 'fire ants' ? 24 : kind === 'wasp swarm' ? 14 : kind === 'camel crickets' ? 8 : 6;
+  const kind = CRITTERS[critterIdx]; const cnt = kind === 'fire ants' ? 6 : kind === 'wasp swarm' ? 4 : kind === 'camel crickets' ? 3 : 2;
   for (let i = 0; i < cnt; i++) { const m = new THREE.Mesh(bugGeo[kind], mat(bugCol[kind])); m.position.copy(p).addScaledVector(n, 0.02); scene.add(m);
     const dir = new THREE.Vector3().randomDirection(); dir.addScaledVector(n, -dir.dot(n)).normalize();
     bugs.push({ m, kind, o, n: n.clone(), dir, life: rr(10, 16), eat: rr(0.3, 1.2), hop: 0, center: p.clone().addScaledVector(n, 0.4), ph: rnd() * 6 }); }
