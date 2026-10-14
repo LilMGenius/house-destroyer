@@ -7,9 +7,11 @@ const rr = (a, b) => a + (b - a) * rnd();
 
 // ---------- renderer ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.xr.enabled = true;
+renderer.xr.setFramebufferScaleFactor?.(0.8);
+renderer.xr.setFoveation?.(1);
 document.body.prepend(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x1a1420);
